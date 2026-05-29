@@ -40,6 +40,9 @@ export default function App() {
   const [customDataName, setCustomDataName] = useState<string | null>(null);
   const [customDataRows, setCustomDataRows] = useState<number>(0);
 
+  // Admin state to filter access to upload utility
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+
   // Filter States
   const [filters, setFilters] = useState<DashboardFilters>({
     regional: '',
@@ -268,7 +271,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50/50 flex flex-col">
       {/* Header section (Title of Dashboard + last sync timestamp) */}
-      <Header lastUpdated={lastUpdatedDate} />
+      <Header 
+        lastUpdated={lastUpdatedDate} 
+        isAdminMode={isAdminMode} 
+        setIsAdminMode={setIsAdminMode} 
+      />
 
       {/* Main Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -289,14 +296,16 @@ export default function App() {
           </div>
         )}
 
-        {/* Dynamic Excel / CSV Upload zone */}
-        <BaseUpload 
-          onDataLoaded={handleCustomDataLoaded} 
-          onReset={handleResetData}
-          isUsingCustomData={isUsingCustomData}
-          customDataName={customDataName}
-          customDataRows={customDataRows}
-        />
+        {/* Dynamic Excel / CSV Upload zone (Only accessible to local Admins) */}
+        {isAdminMode && (
+          <BaseUpload 
+            onDataLoaded={handleCustomDataLoaded} 
+            onReset={handleResetData}
+            isUsingCustomData={isUsingCustomData}
+            customDataName={customDataName}
+            customDataRows={customDataRows}
+          />
+        )}
 
         {/* 1. First Row: Filters (visible on top) */}
         <Filters 

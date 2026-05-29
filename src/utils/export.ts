@@ -45,25 +45,23 @@ export function downloadCSV(headers: string[], rows: (string | number)[][], file
  */
 export function exportColaboradoresToCSV(colaboradores: Colaborador[], typeLabel: string) {
   const headers = [
-    'Matrícula',
+    'LDAP',
     'Nome',
     'Status',
     'Regional',
     'Diretoria',
     'Área de Recursos Humanos',
-    'Cargo',
-    'Centro de Custo'
+    'Cargo'
   ];
 
   const rows = colaboradores.map(c => [
-    c.matricula,
+    c.ldap,
     c.nome,
     c.status,
     c.regional,
     c.diretoria,
     c.areaRH,
-    c.cargo,
-    c.centroCusto
+    c.cargo
   ]);
 
   const dateStr = new Date().toISOString().split('T')[0];

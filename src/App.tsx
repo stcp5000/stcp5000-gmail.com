@@ -66,13 +66,23 @@ export default function App() {
         if (cachedBase && cachedFilename) {
           const parsed = JSON.parse(cachedBase);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setColaboradores(parsed);
-            setIsUsingCustomData(true);
-            setCustomDataName(cachedFilename);
-            setCustomDataRows(parsed.length);
-            setLastUpdatedDate(cachedTimestamp || 'Base Customizada');
-            setLoading(false);
-            return; // skip fetching default
+            // Check if schema is old (lacks 'ldap' or is missing actual data inside)
+            const firstItem = parsed[0];
+            const hasLdap = firstItem && ('ldap' in firstItem) && firstItem.ldap;
+            if (!hasLdap) {
+              console.log("Old schema detected in localStorage. Automatic cleanup to load new schema.");
+              localStorage.removeItem('adeo_custom_base_v2');
+              localStorage.removeItem('adeo_custom_filename');
+              localStorage.removeItem('adeo_custom_timestamp');
+            } else {
+              setColaboradores(parsed);
+              setIsUsingCustomData(true);
+              setCustomDataName(cachedFilename);
+              setCustomDataRows(parsed.length);
+              setLastUpdatedDate(cachedTimestamp || 'Base Customizada');
+              setLoading(false);
+              return; // skip fetching default
+            }
           }
         }
 
@@ -235,12 +245,12 @@ export default function App() {
         }
       }
 
-      // 1.5 Global Search String (matricula or name)
+      // 1.5 Global Search String (LDAP or name)
       if (filters.search.trim() !== '') {
         const query = filters.search.toLowerCase();
         const nomeMatch = colab.nome ? colab.nome.toLowerCase().includes(query) : false;
-        const matriculaMatch = colab.matricula ? colab.matricula.toLowerCase().includes(query) : false;
-        if (!nomeMatch && !matriculaMatch) {
+        const ldapMatch = colab.ldap ? colab.ldap.toLowerCase().includes(query) : false;
+        if (!nomeMatch && !ldapMatch) {
           return false;
         }
       }

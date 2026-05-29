@@ -62,9 +62,8 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
       const q = realizadosSearch.toLowerCase();
       result = result.filter(c => 
         c.nome.toLowerCase().includes(q) || 
-        c.matricula.toLowerCase().includes(q) ||
-        c.cargo.toLowerCase().includes(q) ||
-        c.centroCusto.toLowerCase().includes(q)
+        c.ldap.toLowerCase().includes(q) ||
+        c.cargo.toLowerCase().includes(q)
       );
     }
 
@@ -90,9 +89,8 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
       const q = naoRealizadosSearch.toLowerCase();
       result = result.filter(c => 
         c.nome.toLowerCase().includes(q) || 
-        c.matricula.toLowerCase().includes(q) ||
-        c.cargo.toLowerCase().includes(q) ||
-        c.centroCusto.toLowerCase().includes(q)
+        c.ldap.toLowerCase().includes(q) ||
+        c.cargo.toLowerCase().includes(q)
       );
     }
 
@@ -305,8 +303,8 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
-                      <th onClick={() => handleRealizadosSort('matricula')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
-                        Matrícula {renderSortArrowRealizados('matricula')}
+                      <th onClick={() => handleRealizadosSort('ldap')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
+                        LDAP {renderSortArrowRealizados('ldap')}
                       </th>
                       <th onClick={() => handleRealizadosSort('nome')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
                         Nome {renderSortArrowRealizados('nome')}
@@ -323,9 +321,6 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
                       <th onClick={() => handleRealizadosSort('cargo')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
                         Cargo {renderSortArrowRealizados('cargo')}
                       </th>
-                      <th onClick={() => handleRealizadosSort('centroCusto')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
-                        Centro de Custo {renderSortArrowRealizados('centroCusto')}
-                      </th>
                       <th className="py-3 px-4 text-center">
                         Status
                       </th>
@@ -333,14 +328,13 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
                   </thead>
                   <tbody className="divide-y divide-slate-150 text-slate-700">
                     {paginatedRealizados.map((c) => (
-                      <tr key={c.matricula} className="hover:bg-slate-50/50 transition">
-                        <td className="py-3 px-4 font-mono font-bold text-slate-800">{c.matricula}</td>
+                      <tr key={c.ldap} className="hover:bg-slate-50/50 transition">
+                        <td className="py-3 px-4 font-mono font-bold text-slate-800">{c.ldap}</td>
                         <td className="py-3 px-4 font-semibold text-slate-900">{c.nome}</td>
                         <td className="py-3 px-4 font-display text-slate-600 font-medium">{c.regional}</td>
                         <td className="py-3 px-4 text-slate-500">{c.diretoria}</td>
                         <td className="py-3 px-4 text-slate-500">{c.areaRH}</td>
                         <td className="py-3 px-4 font-medium text-slate-600">{c.cargo}</td>
-                        <td className="py-3 px-4 text-slate-500 font-sans">{c.centroCusto}</td>
                         <td className="py-3 px-4 text-center">
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -459,8 +453,8 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
-                      <th onClick={() => handleNaoRealizadosSort('matricula')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
-                        Matrícula {renderSortArrowNaoRealizados('matricula')}
+                      <th onClick={() => handleNaoRealizadosSort('ldap')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
+                        LDAP {renderSortArrowNaoRealizados('ldap')}
                       </th>
                       <th onClick={() => handleNaoRealizadosSort('nome')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
                         Nome {renderSortArrowNaoRealizados('nome')}
@@ -477,9 +471,6 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
                       <th onClick={() => handleNaoRealizadosSort('cargo')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
                         Cargo {renderSortArrowNaoRealizados('cargo')}
                       </th>
-                      <th onClick={() => handleNaoRealizadosSort('centroCusto')} className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition select-none">
-                        Centro de Custo {renderSortArrowNaoRealizados('centroCusto')}
-                      </th>
                       <th className="py-3 px-4 text-center">
                         Status
                       </th>
@@ -487,14 +478,13 @@ export default function TabelasDetalhadas({ filteredColaboradores }: TabelasDeta
                   </thead>
                   <tbody className="divide-y divide-slate-150 text-slate-700">
                     {paginatedNaoRealizados.map((c) => (
-                      <tr key={c.matricula} className="hover:bg-slate-50/50 transition">
-                        <td className="py-3 px-4 font-mono font-bold text-slate-800">{c.matricula}</td>
+                      <tr key={c.ldap} className="hover:bg-slate-50/50 transition">
+                        <td className="py-3 px-4 font-mono font-bold text-slate-800">{c.ldap}</td>
                         <td className="py-3 px-4 font-semibold text-slate-900">{c.nome}</td>
                         <td className="py-3 px-4 font-display text-slate-600 font-medium">{c.regional}</td>
                         <td className="py-3 px-4 text-slate-500">{c.diretoria}</td>
                         <td className="py-3 px-4 text-slate-500">{c.areaRH}</td>
                         <td className="py-3 px-4 font-medium text-slate-600">{c.cargo}</td>
-                        <td className="py-3 px-4 text-slate-500 font-sans">{c.centroCusto}</td>
                         <td className="py-3 px-4 text-center">
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>

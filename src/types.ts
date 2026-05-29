@@ -4,14 +4,13 @@
  */
 
 export interface Colaborador {
-  matricula: string;
+  ldap: string;
   nome: string;
   status: 'Realizado' | 'No realizado' | 'Não realizado';
   regional: string;
   diretoria: string;
   areaRH: string;
   cargo: string;
-  centroCusto: string;
 }
 
 export interface DashboardFilters {

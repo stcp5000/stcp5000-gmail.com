@@ -23,7 +23,9 @@ export default function Filters({ filters, onFilterChange, onClear, allColaborad
     const statuses = new Set<string>();
 
     allColaboradores.forEach((c) => {
-      if (c.regional) regionals.add(c.regional);
+      if (c.regional) {
+        regionals.add(c.regional);
+      }
       if (c.status) statuses.add(c.status);
     });
 

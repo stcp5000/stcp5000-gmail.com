@@ -84,70 +84,103 @@ export default function BaseUpload({
           throw new Error(`Nenhum dado encontrado na aba "${targetSheetName}". Verifique os dados.`);
         }
 
-        // Map raw grid objects into our Colaborador entity
-        const mappedColaboradores: Colaborador[] = [];
-        let missingColumnsCount = 0;
+        // Get positional column headers
+        const sheetRows = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1, defval: '' });
+        const headersRow = sheetRows[0] || [];
 
-        for (const row of rows) {
-          const getVal = (possibleKeys: string[], defaultVal = ''): string => {
-            for (const key of Object.keys(row)) {
-              const normRowKey = normalizeKey(key);
-              const found = possibleKeys.some(pk => normalizeKey(pk) === normRowKey || normRowKey.includes(normalizeKey(pk)));
-              if (found) {
-                return row[key] ? String(row[key]).trim() : '';
+        // Match headers dynamically to find exact column indices
+        const headerIndices: { [key: string]: number } = {};
+        for (let i = 0; i < headersRow.length; i++) {
+          const rawHeader = headersRow[i];
+          if (rawHeader === undefined || rawHeader === null) continue;
+          const norm = normalizeKey(String(rawHeader));
+          headerIndices[norm] = i;
+        }
+
+        const getIndex = (possibleKeys: string[], defaultIdx: number): number => {
+          for (const key of possibleKeys) {
+            const norm = normalizeKey(key);
+            // 1. Try finding exact match
+            if (headerIndices[norm] !== undefined) {
+              return headerIndices[norm];
+            }
+          }
+          // 2. Try finding loose / partial matches
+          for (const key of possibleKeys) {
+            const norm = normalizeKey(key);
+            for (const header of Object.keys(headerIndices)) {
+              if (header.includes(norm) || norm.includes(header)) {
+                // Ensure we never match "codcargo" or "codigocargo" when specifically looking for "cargo"
+                if (norm === 'cargo' && (header === 'codcargo' || header === 'codigocargo')) {
+                  continue;
+                }
+                return headerIndices[header];
               }
             }
-            return defaultVal;
-          };
+          }
+          return defaultIdx;
+        };
 
-          const matricula = getVal(['matricula', 'id', 'codm', 'codmatricula', 'ldap'], '');
-          const nome = getVal(['nome', 'namesocial', 'nomesocial', 'fullname', 'funcionario', 'colaborador', 'colab'], '');
+        // Specific, prioritized mapped indices with fallbacks matching standard layout
+        const ldapIdx = getIndex(['ldap', 'matricula', 'id', 'codm'], 1); // Column B is index 1
+        const cargoIdx = getIndex(['cargo', 'funcao', 'role'], 6); // Column G is index 6
+        const nomeIdx = getIndex(['nome', 'namesocial', 'nomesocial', 'fullname', 'funcionario', 'colaborador'], 2); // Column C is index 2
+        const statusIdx = getIndex(['status', 'situacao', 'realizacao', 'capacitacao'], 4); // Column E is index 4
+        const regionalIdx = getIndex(['regional', 'regiao'], 11); // Column L is index 11
+        const diretoriaIdx = getIndex(['descrdiretoria', 'descr.diretoria', 'diretoria descr', 'diretoria'], 12); // Column M is index 12
+        const areaRHIdx = getIndex(['areaderecursoshumanos', 'arearecursoshumanos', 'arearh', 'rharea', 'bp', 'businesspartner'], 13); // Column N is index 13
+
+        // Map raw grid objects into our Colaborador entity
+        const mappedColaboradores: Colaborador[] = [];
+
+        // Loop through all data rows starting from row 1 (0 is header)
+        for (let r = 1; r < sheetRows.length; r++) {
+          const rowArr = sheetRows[r];
+          if (!rowArr || rowArr.length === 0) continue;
+
+          // 1. LDAP (first column) comes from our mapped LDAP Column (index 1 / Column B fallback)
+          const ldap = rowArr[ldapIdx] !== undefined ? String(rowArr[ldapIdx]).trim() : '';
+
+          // 2. Cargo comes from our mapped Cargo Column (index 6 / Column G fallback)
+          const cargo = rowArr[cargoIdx] !== undefined ? String(rowArr[cargoIdx]).trim() : 'Colaborador';
+
+          // 3. Nome comes from Nome Column (index 2 / Column C fallback)
+          const nome = rowArr[nomeIdx] !== undefined ? String(rowArr[nomeIdx]).trim() : '';
           
-          if (!matricula || !nome) {
-            // Skip rows without main identifiers, typically empty or header leftovers
+          if (!ldap || !nome) {
+            // Skip rows without main identifiers (typically empty footer spacing or corrupted data rows)
             continue;
           }
 
-          // Status decoding with smart defaults
-          const statusRaw = getVal(['status', 'situacao', 'realizacao', 'capacitacao'], 'Não realizado');
+          // 4. Status decoding (index 4 / Column E fallback)
+          const statusRaw = rowArr[statusIdx] !== undefined ? String(rowArr[statusIdx]).trim() : 'Não realizado';
           let status: 'Realizado' | 'Não realizado' | 'No realizado' = 'Não realizado';
           
           const normStatus = statusRaw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
           if (normStatus.startsWith('realiz') || normStatus === 'sim' || normStatus === 's' || normStatus === 'completed' || normStatus === 'ok') {
             status = 'Realizado';
-          } else if (normStatus.includes('no realizado') || normStatus.includes('nao realiz')) {
-            status = 'Não realizado';
           } else {
             status = 'Não realizado';
           }
 
-          // Directory mapping: Column L / Descr. Diretoria maps to "regional" (as requested by user)
-          const diretoriaRow = getVal(['descr diretoria', 'descr. diretoria', 'diretoria descr', 'diretoria', 'regional/diretoria', 'diretoriaregional'], '');
-          const regionalRow = getVal(['regional', 'regiao'], '');
+          // 5. Regional and Diretoria directory mapping (L / M / N indices fallback)
+          const regionalRowRaw = rowArr[regionalIdx] !== undefined ? String(rowArr[regionalIdx]).trim() : '';
+          const diretoriaRowRaw = rowArr[diretoriaIdx] !== undefined ? String(rowArr[diretoriaIdx]).trim() : '';
           
-          // Map Column L ("Descr. Diretoria") as Regional, falling back to regional if needed
-          const regional = diretoriaRow || regionalRow || 'Regional Geral';
-          const diretoria = diretoriaRow || regionalRow || 'Diretoria Geral';
+          const regional = regionalRowRaw || 'Regional Geral';
+          const diretoria = diretoriaRowRaw || 'Diretoria Geral';
 
-          // Área de Recursos Humanos (Column N) maps to "areaRH"
-          const areaRH = getVal(['area de recursos humanos', 'area recursos humanos', 'area rh', 'arearh', 'rharea', 'bp', 'business partner'], 'Geral');
-
-          // Cargo and CC
-          const cargo = getVal(['cargo', 'funcao', 'role', 'grade'], 'Colaborador');
-          
-          const codCC = getVal(['cod centro custo', 'cod cc', 'cccode', 'centrodecustocod'], '');
-          const descCC = getVal(['centro de custo', 'centrocusto', 'ccname', 'ccdescricao'], '');
-          const centroCusto = codCC && descCC ? `${codCC} - ${descCC}` : (descCC || codCC || 'CC Geral');
+          // 6. Área de Recursos Humanos maps to "areaRH" (index 13 / Column N fallback)
+          const areaRH = rowArr[areaRHIdx] !== undefined ? String(rowArr[areaRHIdx]).trim() : 'Geral';
 
           mappedColaboradores.push({
-            matricula,
+            ldap,
             nome,
             status,
             regional,
             diretoria,
             areaRH,
-            cargo,
-            centroCusto
+            cargo
           });
         }
 

@@ -1,0 +1,6 @@
+{
+  "name": "Competências do Líder ADEO - Dashboard",
+  "description": "Dashboard corporativo para acompanhamento do status de realização do treinamento dos colaboradores elegíveis do programa Competências do Líder ADEO.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

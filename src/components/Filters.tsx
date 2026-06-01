@@ -24,19 +24,19 @@ export default function Filters({ filters, onFilterChange, onClear, allColaborad
 
     allColaboradores.forEach((c) => {
       if (c.regional) {
-        regionals.add(c.regional);
+        regionals.add(c.regional.trim());
       }
-      if (c.status) statuses.add(c.status);
+      if (c.status) statuses.add(c.status.trim());
     });
 
     // Handle cascading / respective filter for Area de Recursos Humanos
     // If a Regional is selected, only show respective Area RHs that have records for that Regional
     const filteredForAreaRH = filters.regional 
-      ? allColaboradores.filter(c => c.regional === filters.regional)
+      ? allColaboradores.filter(c => c.regional && c.regional.trim().toLowerCase() === filters.regional.trim().toLowerCase())
       : allColaboradores;
 
     filteredForAreaRH.forEach((c) => {
-      if (c.areaRH) areaRHs.add(c.areaRH);
+      if (c.areaRH) areaRHs.add(c.areaRH.trim());
     });
 
     return {

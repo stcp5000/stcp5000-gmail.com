@@ -202,7 +202,10 @@ export default function App() {
         const selectedRegional = newFilters.regional;
         if (selectedRegional) {
           const hasAreaInRegional = colaboradores.some(
-            c => c.regional === selectedRegional && c.areaRH === updated.areaRH
+            c => 
+              c.regional && c.areaRH &&
+              c.regional.trim().toLowerCase() === selectedRegional.trim().toLowerCase() &&
+              c.areaRH.trim().toLowerCase() === updated.areaRH.trim().toLowerCase()
           );
           if (!hasAreaInRegional) {
             updated.areaRH = '';
@@ -226,13 +229,21 @@ export default function App() {
   const filteredColaboradores = useMemo(() => {
     return colaboradores.filter((colab) => {
       // 1.1 Regional Filter
-      if (filters.regional !== '' && colab.regional !== filters.regional) {
-        return false;
+      if (filters.regional !== '') {
+        const normFilterReg = filters.regional.trim().toLowerCase();
+        const normColabReg = colab.regional ? colab.regional.trim().toLowerCase() : '';
+        if (normColabReg !== normFilterReg) {
+          return false;
+        }
       }
 
       // 1.2 Área de Recursos Humanos Filter
-      if (filters.areaRH !== '' && colab.areaRH !== filters.areaRH) {
-        return false;
+      if (filters.areaRH !== '') {
+        const normFilterArea = filters.areaRH.trim().toLowerCase();
+        const normColabArea = colab.areaRH ? colab.areaRH.trim().toLowerCase() : '';
+        if (normColabArea !== normFilterArea) {
+          return false;
+        }
       }
 
       // 1.4 Status Filter

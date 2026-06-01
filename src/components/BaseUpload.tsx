@@ -126,9 +126,9 @@ export default function BaseUpload({
         const cargoIdx = getIndex(['cargo', 'funcao', 'role'], 6); // Column G is index 6
         const nomeIdx = getIndex(['nome', 'namesocial', 'nomesocial', 'fullname', 'funcionario', 'colaborador'], 2); // Column C is index 2
         const statusIdx = getIndex(['status', 'situacao', 'realizacao', 'capacitacao'], 4); // Column E is index 4
-        const regionalIdx = getIndex(['regional', 'regiao'], 11); // Column L is index 11
+        const regionalIdx = getIndex(['regional', 'regiao', 'descrdiretoria', 'descr.diretoria', 'diretoria descr', 'diretoria'], 11); // Column L is index 11
         const diretoriaIdx = getIndex(['descrdiretoria', 'descr.diretoria', 'diretoria descr', 'diretoria'], 12); // Column M is index 12
-        const areaRHIdx = getIndex(['areaderecursoshumanos', 'arearecursoshumanos', 'arearh', 'rharea', 'bp', 'businesspartner'], 13); // Column N is index 13
+        const areaRHIdx = getIndex(['areaderecursoshumanos', 'arearecursoshumanos', 'arearh', 'rharea', 'bp', 'businesspartner', 'recursoshumanos', 'rh', 'recurso'], 13); // Column N is index 13
 
         // Map raw grid objects into our Colaborador entity
         const mappedColaboradores: Colaborador[] = [];
